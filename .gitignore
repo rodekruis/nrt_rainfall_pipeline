@@ -1,0 +1,8 @@
+# Secrets
+.env
+
+# Data
+data/gpm/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/

@@ -1,0 +1,2 @@
+no_days_to_monitor: 14  # number of most recent days to observe rainfall
+rainfall_threshold: 50  # threshold to send to EspoCRM

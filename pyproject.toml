@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "nrt-rainfall-pipeline"
+version = "0.1.0"
+description = ""
+authors = ["pphung"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+xarray = "^2024.10.0"
+rasterio = "^1.4.2"
+requests = "^2.32.3"
+python-dotenv = "^1.0.1"
+geopandas = "^1.0.1"
+pyyaml = "^6.0.2"
+azure-identity = "^1.19.0"
+azure-keyvault-secrets = "^4.9.0"
+rasterstats = "^0.20.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
