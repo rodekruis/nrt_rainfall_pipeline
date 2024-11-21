@@ -1,6 +1,6 @@
 import rasterio
 from rasterio.mask import mask
-import datetime
+from datetime import timedelta
 import os
 import subprocess
 import time
@@ -19,15 +19,14 @@ class Extract:
     """
 
     def __init__(
-        self,
-        dateend,
-        settings: Settings = None,
-        secrets: Secrets = None,
-    ):
+            self,
+            settings: Settings = None,
+            secrets: Secrets = None
+            ):
         self.secrets = None
         self.settings = None
-        self.inputGPM = "./data/gpm"
         self.load = Load()
+        self.inputGPM = "./data/gpm"
         if not os.path.exists(self.inputGPM):
             os.makedirs(self.inputGPM)
         if settings is not None:
@@ -36,13 +35,12 @@ class Extract:
         if secrets is not None:
             self.set_secrets(secrets)
             self.load.set_secrets(secrets)
-        self.dateend = dateend
 
     def set_settings(self, settings):
         """Set settings"""
         if not isinstance(settings, Settings):
             raise TypeError(f"invalid format of settings, use settings.Settings")
-        settings.check_settings(["no_days_monitor", "rainfall_threshold"])
+        settings.check_settings(["days-to-observe", "alert-on-threshold"])
         self.settings = settings
 
     def set_secrets(self, secrets):
@@ -53,22 +51,22 @@ class Extract:
         self.secrets = secrets
 
 
-    def get_data(self, dateend):
+    def get_data(self, country: str, dateend):
         """
         Get observed rainfall data from source and 
         """
-        # extract
-        number_of_date = self.settings.get_setting("no_days_to_monitor")
-        for n in range(0, number_of_date+1):
-            filedate = dateend - datetime.timedelta(days=n)
-            file_name, file_url = self.define_file_url(filedate)
-            self.download_rainfall(self.secrets.get_secret("EOSDIS_USERNAME"), 
-                                   self.secrets.get_secret("EOSDIS_PASSWORD"),
-                                   file_name, file_url)
-            self.prepare_rainfall_data(file_name)
+        self.country = country
+        days_to_observe = self.settings.get_country_setting(self.country, "days-to-observe")
+        for n in range(0, days_to_observe+1):
+            filedate = dateend - timedelta(days=n)
+            file_name, file_url = self.__define_file_url(filedate)
+            self.__download_rainfall(self.secrets.get_secret("EOSDIS_USERNAME"), 
+                                     self.secrets.get_secret("EOSDIS_PASSWORD"),
+                                     file_name, file_url)
+            self.__prepare_rainfall_data(file_name)
 
 
-    def define_file_url(self, filedate):
+    def __define_file_url(self, filedate):
         '''
         Get filedate and return file name, file url
         '''
@@ -81,7 +79,7 @@ class Extract:
         return file_name, file_url
 
 
-    def download_rainfall(self, username, password, file_name, file_url):
+    def __download_rainfall(self, username, password, file_name, file_url):
         '''
         Donwnload the rainfall data zip file and extract the zip file.
         Retry 5 times max if failed
@@ -89,8 +87,8 @@ class Extract:
         no_attempts, attempt, download_done = 5, 0, False
         while attempt < no_attempts:
             try:
-                self.get_rainfall(username, password, file_name, file_url)
                 download_done = True
+                self.__get_rainfall(username, password, file_name, file_url)
                 time.sleep(10)
                 break
             except urllib.error.URLError:
@@ -100,28 +98,29 @@ class Extract:
             raise ConnectionError("GPM server not available")
 
 
-    def get_rainfall(self, username, password, file_name, file_url):
-        if not os.path.isfile(f"data/gpm/{file_name}.zip"):
-            download_command = f"""wget -q --user={username} --password={password} {file_url} -P data/gpm"""
+    def __get_rainfall(self, username, password, file_name, file_url):
+        if not os.path.isfile(f"{self.inputGPM}/{file_name}.zip"):
+            download_command = f"""wget -P {self.inputGPM} --user={username} --password={password} {file_url}"""
             subprocess.call(download_command, cwd=".", shell=True)
-        with ZipFile(f"data/gpm/{file_name}.zip", 'r') as zf:
-            zf.extract(f"{file_name}.tif", path="data/gpm") 
+        with ZipFile(f"{self.inputGPM}/{file_name}.zip", 'r') as zf:
+            zf.extract(f"{file_name}.tif", path=f"{self.inputGPM}") 
 
 
-    def prepare_rainfall_data(self, file_name):
+    def __prepare_rainfall_data(self, file_name):
         '''
         For each date (file), slice it to the extent of the country
         '''
-        shapefile_dir = 'data/admin_boundary/cmr_admbnda_adm0_inc_20180104.shp'
-        shapefile = gpd.read_file(f"{shapefile_dir}")
+        shp_name = "cmr_regions_2022"
+        shp_dir = f"data/admin_boundary/{shp_name}.shp"
+        shapefile = gpd.read_file(f"{shp_dir}")
         shapes = [feature["geometry"] for feature in shapefile.iterfeatures()]
-        with rasterio.open(f"data/gpm/{file_name}.tif") as src:
+        with rasterio.open(f"{self.inputGPM}/{file_name}.tif") as src:
             out_image, out_transform = mask(src, shapes, crop=True)
             out_meta = src.meta 
         out_meta.update({"driver": "GTiff",
                         "height": out_image.shape[1],
                         "width": out_image.shape[2],
                         "transform": out_transform})
-        with rasterio.open(f"data/gpm/CRM_{file_name}.tif", "w", **out_meta) as dest:
+        with rasterio.open(f"{self.inputGPM}/{self.country}_{file_name}.tif", "w", **out_meta) as dest:
             dest.write(out_image)
 

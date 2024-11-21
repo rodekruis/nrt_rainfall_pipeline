@@ -3,7 +3,7 @@ from nrt_rainfall_pipeline.load import Load
 from nrt_rainfall_pipeline.transform import Transform
 from nrt_rainfall_pipeline.secrets_settings import Secrets
 from nrt_rainfall_pipeline.settings import Settings
-from datetime import datetime, date, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 
 logger = logging.getLogger()
@@ -17,8 +17,11 @@ logging.getLogger("requests_oauthlib").setLevel(logging.WARNING)
 class Pipeline:
     """Base class for flood data pipeline"""
 
-    def __init__(self, settings: Settings, secrets: Secrets):
+    def __init__(self, settings: Settings, secrets: Secrets, country: str):
         self.settings = settings
+        if country not in [c["name"] for c in self.settings.get_setting("countries")]:
+            raise ValueError(f"No config found for country {country}")
+        self.country = country
         self.load = Load(settings=settings, 
                          secrets=secrets)
         self.extract = Extract(
@@ -36,23 +39,23 @@ class Pipeline:
         transform: bool = True,
         send: bool = True,
         save: bool =True,
-        # debug: bool = False, 
-        dateend: datetime = datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(days=1),
+        dateend: datetime = datetime.now(timezone.utc)-timedelta(days=1),
+        # debug: bool = False
     ):
         """Run the flood data pipeline"""
 
         if extract: # download data
             logging.info(f"extract rainfall data")
-            self.extract.get_data(dateend)
+            self.extract.get_data(country=self.country, dateend=dateend)
             if save:
                 pass
 
         if transform:
             logging.info("compute average past days")
-            average_rainfall = self.transfrom.compute_average_rainfall(dateend)
+            average_rainfall = self.transfrom.compute_rainfall(country=self.country, dateend=dateend)
             if save:
                 pass
 
         if send: # send to espo
             logging.info("send data to EspoCRM")
-            self.load.send_to_espocrm_api(average_rainfall)
+            self.load.send_to_espo_api(country=self.country, data=average_rainfall)

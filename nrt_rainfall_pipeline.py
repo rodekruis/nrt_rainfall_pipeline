@@ -12,22 +12,17 @@ import click
 @click.option("--send", help="send to EspoCRM", default=False, is_flag=True)
 @click.option("--save", help="save to storage", default=False, is_flag=True)
 @click.option(
-    "--datestart",
+    "--dateend",
     help="date start in YYYY-mm-dd",
     default=(datetime.now(timezone.utc)-timedelta(days=1)).strftime("%Y-%m-%d"),
 )
-# @click.option(
-#     "--debug",
-#     help="debug mode: process only one ensemble member from yesterday",
-#     default=False,
-#     is_flag=True,
-# )
 
 def run_nrt_rainfall_pipeline(
-    extract, transform, send, save, datestart#, debug
+    country, extract, transform, send, save, dateend#, debug
 ):
-    datestart = datetime.strptime(datestart, "%Y-%m-%d")
+    dateend = datetime.strptime(dateend, "%Y-%m-%d")
     pipe = Pipeline(
+        country=country,
         settings=Settings("config/config.yaml"),
         secrets=Secrets(".env"),
     )
@@ -36,8 +31,7 @@ def run_nrt_rainfall_pipeline(
         transform=transform,
         send=send,
         save=save,
-        # debug=debug,
-        datestart=datestart
+        dateend=dateend
     )
 
 
