@@ -14,7 +14,7 @@ import click
 @click.option(
     "--dateend",
     help="date start in YYYY-mm-dd",
-    default=(datetime.now(timezone.utc)-timedelta(days=1)).strftime("%Y-%m-%d"),
+    default=(datetime.now(timezone.utc)-timedelta(days=2)).strftime("%Y-%m-%d"),
 )
 
 def run_nrt_rainfall_pipeline(
