@@ -110,8 +110,8 @@ class Extract:
         '''
         For each date (file), slice it to the extent of the country
         '''
-        shp_name = "cmr_regions_2022"
-        shp_dir = f"data/admin_boundary/{shp_name}.shp"
+        shp_name = self.settings.get_country_setting(self.country, "shapefile")
+        shp_dir = f"data/admin_boundary/{shp_name}"
         shapefile = gpd.read_file(f"{shp_dir}")
         shapes = [feature["geometry"] for feature in shapefile.iterfeatures()]
         with rasterio.open(f"{self.inputGPM}/{file_name}.tif") as src:

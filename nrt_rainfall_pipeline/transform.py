@@ -76,10 +76,9 @@ class Transform:
 
     # transform
     def __calculate_zonalstats(self):
-        shp_name = "cmr_district_sante_2022"
-        shp_dir = f"data/admin_boundary/{shp_name}.shp"
+        shp_name = self.settings.get_country_setting(self.country, "shapefile")
+        shp_dir = f"data/admin_boundary/{shp_name}"
         shapefile = gpd.read_file(f"{shp_dir}")
-        df_shp = pd.DataFrame(shapefile)
         tif_name = f"{self.country}_{self.datestart.strftime('%Y-%m-%d')}_{self.dateend.strftime('%Y-%m-%d')}"
         stats = zonal_stats(shapefile,
                             f"{self.inputGPM}/{tif_name}.tif",
