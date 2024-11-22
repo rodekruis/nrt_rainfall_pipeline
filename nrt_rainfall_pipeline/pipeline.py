@@ -39,7 +39,7 @@ class Pipeline:
         transform: bool = True,
         send: bool = True,
         save: bool =True,
-        dateend: datetime = datetime.now(timezone.utc)-timedelta(days=1),
+        dateend: datetime = datetime.now(timezone.utc)-timedelta(days=2),
         # debug: bool = False
     ):
         """Run the flood data pipeline"""
