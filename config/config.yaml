@@ -1,6 +1,11 @@
 countries:
   - name: CMR
-    shapefile: cmr_district_sante_2022.geojson # shapefile name in geojson format where the zonal stats bases on
     days-to-observe: 14  # number of most recent days to observe rainfall
     alert-on-threshold: 50  # threshold to send to EspoCRM
-    destination-entity: CClimaticHazard
+    shapefile-area: cmr_district_sante_2022.geojson # shapefile of areas (.geojson) where the zonal stats bases on
+    espo-area:  # entity storing areas code and id
+      entity: CHealthDistrict
+      field: CHealthDistrictId
+    espo-destination: # entity to send alerts to
+      entity: CClimaticHazard
+      field: averageRainfall
