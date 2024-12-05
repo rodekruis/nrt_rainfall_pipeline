@@ -110,7 +110,7 @@ class Extract:
         '''
         For each date (file), slice it to the extent of the country
         '''
-        shp_name = self.settings.get_country_setting(self.country, "shapefile")
+        shp_name = self.settings.get_country_setting(self.country, "shapefile-area")
         shp_dir = f"data/admin_boundary/{shp_name}"
         shapefile = gpd.read_file(f"{shp_dir}")
         shapes = [feature["geometry"] for feature in shapefile.iterfeatures()]

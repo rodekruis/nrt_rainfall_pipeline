@@ -30,7 +30,8 @@ class Load:
 
     def send_to_espo_api(self, country, data: list):
         self.country = country
-        entity = self.settings.get_country_setting(self.country, "destination-entity")
+        destination = self.settings.get_country_setting(self.country, "espo-destination")
+        entity = destination["entity"]
         espo_client = EspoAPI(self.secrets.get_secret("ESPOCRM_URL"), 
                               self.secrets.get_secret("ESPOCRM_API_KEY"))
         for data in data:

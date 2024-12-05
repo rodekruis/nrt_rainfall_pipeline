@@ -77,7 +77,7 @@ class Transform:
 
     # transform
     def __calculate_zonalstats(self):
-        shp_name = self.settings.get_country_setting(self.country, "shapefile")
+        shp_name = self.settings.get_country_setting(self.country, "shapefile-area")
         shp_dir = f"data/admin_boundary/{shp_name}"
         shapefile = gpd.read_file(f"{shp_dir}")
         tif_name = f"{self.country}_{self.datestart.strftime('%Y-%m-%d')}_{self.dateend.strftime('%Y-%m-%d')}"
@@ -93,23 +93,29 @@ class Transform:
         """
         Prepare zonal stats data into payload matching EspoCRM requirements
         """
+        area = self.settings.get_country_setting(self.country, "espo-area")
+        area_entity = area["entity"]
+        area_field = area["field"]
+        destination = self.settings.get_country_setting(self.country, "espo-destination")
+        destination_field = destination["field"]
         additional_data = {"status": "onhold",
                            "type": "heavyrainfall", 
                            "source": "GPM"}
-        admin_id = self.load.get_admin_id("CHealthDistrict", "code")
+        admin_id = self.load.get_admin_id(area_entity, "code")
         admin_id = self.__extract_id_from_key(admin_id)
         stats_list = []
         for d in stats:
-            new_d = {k: d["properties"][k] for k in ["CODE_DS","median"]}
-            new_d["cHealthDistrictId"] = admin_id.get(new_d["CODE_DS"], new_d["CODE_DS"])
-            del new_d['CODE_DS']
-            new_d["average14dayRainfall"] = new_d.pop('median')
+            new_d = {k: d["properties"][k] for k in ["code","median"]}
+            new_d[area_field] = admin_id.get(new_d["code"], new_d["code"])
+            del new_d['code']
+            new_d[destination_field] = new_d.pop('median')
             new_d.update(additional_data)
-            # new_d["cHealthDistrict"] = admin_id.get(new_d["cHealthDistrict"], new_d["cHealthDistrict"])
             stats_list.append(new_d)
+            print('stats_list: ', stats_list)
 
         threshold = self.settings.get_country_setting(self.country, "alert-on-threshold")
-        filtered = self.__filter_dict(stats_list, 'average14dayRainfall', threshold)
+        filtered = self.__filter_dict(stats_list, destination_field, threshold)
+        print("Data to send: " , len(filtered))
         return filtered
     
     def __filter_dict(self, stats_list, key_to_filter: str, threshold: float):
