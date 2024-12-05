@@ -3,9 +3,14 @@
 Near real-time rainfall monitoring. Part of the project RIPOSTE for Cameroon Red Cross Society.
 
 ## Description
-The pipeline roughly consists of three steps:
+Data consumed:
+- Level 3 IMERG Early Run: PPS Near Real-time, see https://gpm.nasa.gov/data/directory
+- Value: 1-day precipitation accumulation (mm)
+- Link to download: https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/early/
+- Temporal range: most recent past days (e.g. last 14 days)
 
-- Extract daily data on rainfall measurement of the past days (e.g. last 14 days) from [NOAA's GPM](https://gpm.nasa.gov/data/directory)
+The pipeline roughly consists of three steps:
+- Extract the 1-day data on rainfall measurement as above.
 - Transform the data into pre-defined areas (health districts) and calculate average rainfall of the past days. Then determine which area has its average rainfall higher than pre-defined thresholds.
 - Send this data as alert to the EspoCRM for the NS.
 

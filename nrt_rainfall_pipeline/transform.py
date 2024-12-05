@@ -55,6 +55,7 @@ class Transform:
 
     def __calculate_average_raster(self):
         """
+        Scale precipitation x0.1
         Sum precipiatation per cell of all raster files and take average per cell
         """
         all_files = glob.glob(f'{self.inputGPM}/{self.country}_*.tif')
@@ -68,7 +69,7 @@ class Transform:
             with rasterio.open(f) as src:
                 result_profile = src.profile
                 result_array = result_array + src.read()
-        result_array = result_array/n
+        result_array = result_array*0.1/n
 
         file_name = f"{self.country}_{self.datestart.strftime('%Y-%m-%d')}_{self.dateend.strftime('%Y-%m-%d')}"
         with rasterio.open(f"{self.inputGPM}/{file_name}.tif", 'w', **result_profile) as dst:
