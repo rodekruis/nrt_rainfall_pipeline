@@ -111,7 +111,6 @@ class Transform:
             new_d[destination_field] = new_d.pop('median')
             new_d.update(additional_data)
             stats_list.append(new_d)
-            print('stats_list: ', stats_list)
 
         threshold = self.settings.get_country_setting(self.country, "alert-on-threshold")
         filtered = self.__filter_dict(stats_list, destination_field, threshold)
