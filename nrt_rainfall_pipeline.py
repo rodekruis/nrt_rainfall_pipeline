@@ -8,17 +8,17 @@ import click
 @click.command()
 @click.option("--country", help="country ISO3", default="CMR")
 @click.option("--extract", help="extract NRT rainfall raster data", default=False, is_flag=True)
-@click.option("--transform", help="calculate rainfall per admin", default=False, is_flag=True)
-@click.option("--send", help="send to EspoCRM", default=False, is_flag=True)
+@click.option("--transform", help="calculate rainfall data in pre-defined administrative areas", default=False, is_flag=True)
+@click.option("--send", help="specify a customed latest date YYYY-mm-dd until which the data should be extracted, by default it is the date before today", default=False, is_flag=True)
 @click.option("--save", help="save to storage", default=False, is_flag=True)
 @click.option(
     "--dateend",
-    help="date start in YYYY-mm-dd",
+    help="date end in YYYY-mm-dd",
     default=(datetime.now(timezone.utc)-timedelta(days=2)).strftime("%Y-%m-%d"),
 )
 
 def run_nrt_rainfall_pipeline(
-    country, extract, transform, send, save, dateend#, debug
+    country, extract, transform, send, save, dateend
 ):
     dateend = datetime.strptime(dateend, "%Y-%m-%d")
     pipe = Pipeline(

@@ -23,21 +23,34 @@ To run the pipeline locally
     pip install poetry
     poetry install --no-interaction
     ```
-3. Run the pipeline : `python nrt_rainfall_pipeline.py --extract --transform --send`
+3. Edit the configuration in `config\config.yaml`
+   ```
+   - name: <country-iso3>
+     days-to-observe: <val> # number of most recent days to observe rainfall e.g. 14
+     alert-on-threshold: <val> # threshold to send to EspoCRM e.g. 50
+     shapefile-area: <name>.geojson # shapefile of areas (. geojson) where the zonal stats bases on
+     espo-area:  # entity storing areas code (and id)
+       entity: <entity-name>
+       field: <id-field-name>
+     espo-destination: # entity to send alerts to
+       entity: <entity-name>
+       field: <rainfall-field-name>
+   ```
+4. Run the pipeline : `python nrt_rainfall_pipeline.py --extract --transform --send`
     ```
     Usage: nrt_rainfall_pipeline.py [OPTIONS]
 
     Options:
     --country TEXT  country ISO3
-    --extract       extract rainfall data
-    --transform     calculate rainfall data into pre-defined
-    --send          send to IBF app
-    --dateend       specify date until which the data should be extracted
-    --help          Show this message and exit.
+    --extract       extract NRT rainfall raster data
+    --transform     calculate rainfall data in pre-defined administrative areas
+    --send          send to EspoCRM
+    --dateend       specify a customed latest date YYYY-mm-dd until which the data should be extracted, by default it is the date before today
+    --help          Show this message and exit
     ```
 
-Payload sent to EspoCRM:
-
+__Note:__ Payload sent to EspoCRM
+```
     {
         "status": "onhold",
         "type": "heavyrainfall", 
@@ -45,6 +58,12 @@ Payload sent to EspoCRM:
         "<espo-area-field>": "<id-field-name>",
         "<espo-destination-field>": "<rainfall-field-name>"
     }
+```
+Where:
+- `<espo-area-field>`: is the value of `espo-area`'s `field` in the config
+- `<id-field-name>`: is to be automatically filled in the pipeline
+- `<espo-destination-field>`: is the value of `espo-destination`'s `field` in the config
+- `<rainfall-field-name>`: is to be automatically filled in the pipeline
 
 ## Adding new country
 1. Prepare shapefile
@@ -65,17 +84,5 @@ Payload sent to EspoCRM:
     | `type`    | `enum` | `heavyrainfall` |
     | `source`   | `enum` or `text` | `GPM` |
 - Make sure the entity for area is linked with this one
-4. Add the new country to the `config\config.yaml` below the existing one:
-   ```
-   - name: <country-iso3>
-     days-to-observe: 14  # number of most recent days to observe rainfall
-     alert-on-threshold: 50  # threshold to send to EspoCRM
-     shapefile-area: <name>.geojson # shapefile of areas (. geojson) where the zonal stats bases on
-     espo-area:  # entity storing areas code (and id)
-       entity: <entity-name>
-       field: <id-field-name>
-     espo-destination: # entity to send alerts to
-       entity: <entity-name>
-       field: <rainfall-field-name>
-   ```
+4. Add the new country to the `config\config.yaml`, see Step 3 in __Basic usage__:
 5. Test and adjust settings if needed.
