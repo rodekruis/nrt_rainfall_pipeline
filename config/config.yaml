@@ -1,6 +1,6 @@
 countries:
   - name: CMR
-    days-to-observe: 14  # number of most recent days to observe rainfall
+    days-to-observe: 4  # number of most recent days to observe rainfall
     alert-on-threshold: 50  # threshold to send to EspoCRM
     shapefile-area: cmr_district_sante_2022.geojson # shapefile of areas (.geojson) where the zonal stats bases on
     espo-area:  # entity storing areas code and id
