@@ -5,7 +5,7 @@ countries:
     shapefile-area: cmr_district_sante_2022.geojson # shapefile of areas (.geojson) where the zonal stats bases on
     espo-area:  # entity storing areas code and id
       entity: CHealthDistrict
-      field: CHealthDistrictId
+      field: cHealthDistrictId
     espo-destination: # entity to send alerts to
       entity: CClimaticHazard
       field: averageRainfall
