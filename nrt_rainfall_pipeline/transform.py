@@ -1,3 +1,5 @@
+import os.path
+
 import rasterio
 import pandas as pd
 from datetime import timedelta
@@ -58,6 +60,11 @@ class Transform:
             f"{self.inputGPM}/{self.country}_3B-DAY-L.GIS.IMERG.*.tif"
         )
         n = len(all_files)
+        if n == 0:
+            logger.warning(
+                f"No GPM data found for {self.country} from {self.datestart} to {self.dateend}"
+            )
+            return
 
         with rasterio.open(all_files[0]) as src:
             result_array = src.read()
@@ -81,13 +88,19 @@ class Transform:
         shp_dir = f"data/admin_boundary/{shp_name}"
         shapefile = gpd.read_file(f"{shp_dir}")
         tif_name = f"{self.country}_{self.datestart.strftime('%Y-%m-%d')}_{self.dateend.strftime('%Y-%m-%d')}"
-        stats = zonal_stats(
-            shapefile,
-            f"{self.inputGPM}/{tif_name}.tif",
-            stats=["median"],
-            all_touched=True,
-            geojson_out=True,
-        )
+        if os.path.exists(f"{self.inputGPM}/{tif_name}.tif"):
+            stats = zonal_stats(
+                shapefile,
+                f"{self.inputGPM}/{tif_name}.tif",
+                stats=["median"],
+                all_touched=True,
+                geojson_out=True,
+            )
+        else:
+            logger.warning(
+                f"Raster file {self.inputGPM}/{tif_name}.tif not found. Zonal stats cannot be computed."
+            )
+            stats = []
         return stats
 
     def __prepare_data_for_espo(self, stats):

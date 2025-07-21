@@ -60,7 +60,6 @@ class Extract:
         for n in range(0, days_to_observe):
             filedate = dateend - timedelta(days=n)
             file_name, file_url = self.__define_file_url(filedate)
-            logger.info(f"Download {file_url}")
             is_file_available = self.__download_rainfall(
                 self.secrets.get_secret("EOSDIS_USERNAME"),
                 self.secrets.get_secret("EOSDIS_PASSWORD"),
@@ -108,13 +107,11 @@ class Extract:
 
     def __get_rainfall(self, username, password, file_name, file_url) -> bool:
         if not os.path.isfile(f"{self.inputGPM}/{file_name}.zip"):
-            download_command = f"""wget -P {self.inputGPM} --user={username} --password={password} {file_url}"""
+            download_command = f"""wget -nv -P {self.inputGPM} --user={username} --password={password} {file_url}"""
             try:
                 subprocess.call(
                     download_command,
                     cwd=".",
-                    stderr=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
                     shell=True,
                 )
             except FileNotFoundError:
