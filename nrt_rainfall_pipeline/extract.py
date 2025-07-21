@@ -115,6 +115,7 @@ class Extract:
                     cwd=".",
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
+                    shell=True,
                 )
             except FileNotFoundError:
                 pass
