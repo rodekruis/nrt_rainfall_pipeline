@@ -60,14 +60,17 @@ class Extract:
         for n in range(0, days_to_observe):
             filedate = dateend - timedelta(days=n)
             file_name, file_url = self.__define_file_url(filedate)
-            logger.info("Download ", file_url)
-            self.__download_rainfall(
+            logger.info(f"Download {file_url}")
+            is_file_available = self.__download_rainfall(
                 self.secrets.get_secret("EOSDIS_USERNAME"),
                 self.secrets.get_secret("EOSDIS_PASSWORD"),
                 file_name,
                 file_url,
             )
-            self.__prepare_rainfall_data(file_name)
+            if is_file_available:
+                self.__prepare_rainfall_data(file_name)
+            else:
+                logger.warning(f"{file_url} not available!")
 
     def __define_file_url(self, filedate):
         """
@@ -83,35 +86,42 @@ class Extract:
         )
         return file_name, file_url
 
-    def __download_rainfall(self, username, password, file_name, file_url):
+    def __download_rainfall(self, username, password, file_name, file_url) -> bool:
         """
         Donwnload the rainfall data zip file and extract the zip file.
         Retry 5 times max if failed
         """
-        no_attempts, attempt, download_done = 5, 0, False
+        no_attempts, attempt, is_file_available = 5, 0, True
         while attempt < no_attempts:
             try:
-                download_done = True
-                self.__get_rainfall(username, password, file_name, file_url)
+                is_file_available = self.__get_rainfall(
+                    username, password, file_name, file_url
+                )
                 time.sleep(10)
                 break
             except urllib.error.URLError:
                 attempt += 1
                 time.sleep(120)
-        if not download_done:
+        if attempt == no_attempts:
             raise ConnectionError("GPM server not available")
+        return is_file_available
 
-    def __get_rainfall(self, username, password, file_name, file_url):
+    def __get_rainfall(self, username, password, file_name, file_url) -> bool:
         if not os.path.isfile(f"{self.inputGPM}/{file_name}.zip"):
             download_command = f"""wget -P {self.inputGPM} --user={username} --password={password} {file_url}"""
-            subprocess.call(
-                download_command,
-                cwd=".",
-                stderr=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-            )
-        with ZipFile(f"{self.inputGPM}/{file_name}.zip", "r") as zf:
-            zf.extract(f"{file_name}.tif", path=f"{self.inputGPM}")
+            try:
+                subprocess.call(
+                    download_command,
+                    cwd=".",
+                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                )
+            except FileNotFoundError:
+                pass
+        if os.path.exists(f"{self.inputGPM}/{file_name}.zip"):
+            with ZipFile(f"{self.inputGPM}/{file_name}.zip", "r") as zf:
+                zf.extract(f"{file_name}.tif", path=f"{self.inputGPM}")
+        return os.path.exists(f"{self.inputGPM}/{file_name}.tif")
 
     def __prepare_rainfall_data(self, file_name):
         """
