@@ -4,10 +4,14 @@ Near real-time rainfall monitoring. Part of the project RIPOSTE for Cameroon Red
 
 ## Description
 Data consumed:
-- Level 3 IMERG Early Run: PPS Near Real-time, see https://gpm.nasa.gov/data/directory
+- [Level 3 IMERG Late Run: PPS Near Real-time](https://gpm.nasa.gov/data/directory/imerg-late-run-pps-near-real-time-gis)
 - Value: 1-day precipitation accumulation (mm)
-- Link to download: https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/early/
+- Data Download URL: https://jsimpsonhttps.pps.eosdis.nasa.gov/imerg/gis/
 - Temporal range: most recent past days (e.g. last 14 days)
+
+> [!IMPORTANT]
+> IMERG Late Run data is updated daily, but the latest data is available only after about 14h.
+> For example, the data of today will be available tomorrow at around 14:00 UTC+0. Read more about it [here](https://gpm.nasa.gov/data/imerg)
 
 The pipeline roughly consists of three steps:
 - Extract the 1-day data on rainfall measurement as above.
