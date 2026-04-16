@@ -74,7 +74,7 @@ class Extract:
         filedate_year = filedate.year
         filedate_month = filedate.month
         filedate_day = filedate.day
-        file_name = f"""3B-DAY-L.GIS.IMERG.{filedate_year}{filedate_month:02d}{filedate_day:02d}.V07B"""
+        file_name = f"""3B-DAY-L.GIS.IMERG.{filedate_year}{filedate_month:02d}{filedate_day:02d}.V07C"""
         file_url = f"""{base_url}/{filedate_year}/{filedate_month:02d}/{file_name}.zip"""
         return file_name, file_url
 
