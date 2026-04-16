@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["pphung"]
 readme = "README.md"
+packages = [{ include = "nrt_rainfall_pipeline" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
