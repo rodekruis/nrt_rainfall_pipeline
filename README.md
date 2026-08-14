@@ -11,7 +11,7 @@ Data consumed:
 
 > [!IMPORTANT]
 > IMERG Late Run data is updated daily, but the latest data is available only after about 14h.
-> For example, the data of today will be available tomorrow at around 14:00 UTC+0. Read more about it [here](https://gpm.nasa.gov/data/imerg)
+> For example, the data of today will be available tomorrow at around 14:00 UTC+0. Read more about it [here](https://gpm.nasa.gov/data/imerg).
 
 The pipeline roughly consists of three steps:
 - Extract the 1-day data on rainfall measurement as above.
