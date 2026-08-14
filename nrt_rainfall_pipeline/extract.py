@@ -112,6 +112,7 @@ class Extract:
                 with open(zip_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         f.write(chunk)
+                logger.info(f"Downloaded {file_name}.zip")
         if os.path.exists(f"{self.inputGPM}/{file_name}.zip"):
             with ZipFile(f"{self.inputGPM}/{file_name}.zip", "r") as zf:
                 zf.extract(f"{file_name}.tif", path=f"{self.inputGPM}")
