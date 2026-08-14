@@ -2,9 +2,8 @@ import rasterio
 from rasterio.mask import mask
 from datetime import timedelta
 import os
-import subprocess
+import requests
 import time
-import urllib
 import geopandas as gpd
 from zipfile import ZipFile
 from nrt_rainfall_pipeline.secrets_settings import Secrets
@@ -96,7 +95,7 @@ class Extract:
                 )
                 time.sleep(10)
                 break
-            except urllib.error.URLError:
+            except requests.exceptions.RequestException:
                 attempt += 1
                 time.sleep(120)
         if attempt == no_attempts:
@@ -104,16 +103,15 @@ class Extract:
         return is_file_available
 
     def __get_rainfall(self, username, password, file_name, file_url) -> bool:
-        if not os.path.isfile(f"{self.inputGPM}/{file_name}.zip"):
-            download_command = f"""wget -nv -P {self.inputGPM} --user={username} --password={password} {file_url}"""
-            try:
-                subprocess.call(
-                    download_command,
-                    cwd=".",
-                    shell=True,
-                )
-            except FileNotFoundError:
-                pass
+        zip_path = f"{self.inputGPM}/{file_name}.zip"
+        if not os.path.isfile(zip_path):
+            response = requests.get(
+                file_url, auth=(username, password), stream=True, timeout=60
+            )
+            if response.status_code == 200:
+                with open(zip_path, "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
         if os.path.exists(f"{self.inputGPM}/{file_name}.zip"):
             with ZipFile(f"{self.inputGPM}/{file_name}.zip", "r") as zf:
                 zf.extract(f"{file_name}.tif", path=f"{self.inputGPM}")
