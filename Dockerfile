@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # install
-RUN deps='curl gnupg gnupg2 wget libexpat1' && \
+RUN deps='curl gnupg gnupg2 libexpat1' && \
 	apt-get update && \
 	apt-get install -y $deps
 RUN pip install poetry
