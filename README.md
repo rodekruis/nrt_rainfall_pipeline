@@ -90,3 +90,7 @@ Where:
 - Make sure the entity for area is linked with this one
 4. Add the new country to the `config\config.yaml`, see Step 3 in __Basic usage__:
 5. Test and adjust settings if needed.
+
+### AI Disclaimer
+
+Parts of the code in this repository were written and reviewed with the assistance of AI tools, including large language models (LLMs). All AI-generated code has been reviewed by human contributors before being merged. The humans involved take responsibility for the correctness and quality of the code. If you have questions or concerns, please contact the maintainers.
